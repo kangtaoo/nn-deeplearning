@@ -12,7 +12,6 @@ and omits many desirable features.
 #### Libraries
 # Standard library
 import random
-import math
 
 # Third-party libraries
 import numpy as np
@@ -153,19 +152,7 @@ class Network(object):
 
 #### Miscellaneous functions
 def sigmoid(z):
-    """The sigmoid function."""
-    # return 1.0/(1.0+np.exp(-z))
-    """use arctan function"""
-    return np.arctan(z);
-
-    """use tanh function"""
-    # return np.tanh(z)
+    return 1.0/(1.0+np.exp(-z))
 
 def sigmoid_prime(z):
-    """Derivative of the sigmoid function."""
-    # return sigmoid(z)*(1-sigmoid(z))
-    """Derivative of arctan"""
-    return 1.0/(1+z**2)
-
-    """Derivative of tanh"""
-    # return 1-(np.tanh(z))**2
+    return sigmoid(z)*(1-sigmoid(z))
