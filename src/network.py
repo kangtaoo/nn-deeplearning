@@ -24,14 +24,33 @@ class Network(object):
         respective layers of the network.  For example, if the list
         was [2, 3, 1] then it would be a three-layer network, with the
         first layer containing 2 neurons, the second layer 3 neurons,
-        and the third layer 1 neuron.  The biases and weights for the
+        and the third layer 1 neuron."""
+        self.num_layers = len(sizes)
+        self.sizes = sizes
+        self.set_zero_weights_and_biases()
+        self.set_transfer_function(sigmoid)
+        self.set_transfer_derivative(sigmoid_prime)
+    
+    def set_transfer_function(self, func):
+        self.func = func
+    
+    def set_transfer_derivative(self, func):
+        self.func_prime = func
+    
+    def set_zero_weights_and_biases(self):
+        sizes = self.sizes
+        self.biases = [np.zeros((y, 1)) for y in sizes[1:]]
+        self.weights = [np.zeros((y, x))
+                        for x, y in zip(sizes[:-1], sizes[1:])]
+    
+    def set_random_weights_and_biases(self):
+        """The biases and weights for the
         network are initialized randomly, using a Gaussian
         distribution with mean 0, and variance 1.  Note that the first
         layer is assumed to be an input layer, and by convention we
         won't set any biases for those neurons, since biases are only
         ever used in computing the outputs from later layers."""
-        self.num_layers = len(sizes)
-        self.sizes = sizes
+        sizes = self.sizes
         self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
         self.weights = [np.random.randn(y, x)
                         for x, y in zip(sizes[:-1], sizes[1:])]
@@ -39,7 +58,7 @@ class Network(object):
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
         for b, w in zip(self.biases, self.weights):
-            a = sigmoid(np.dot(w, a)+b)
+            a = self.func(np.dot(w, a)+b)
         return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
@@ -63,9 +82,9 @@ class Network(object):
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
                 print "Epoch {0}: {1} / {2}".format(
-                    j, self.evaluate(test_data), n_test)
+                    j+1, self.evaluate(test_data), n_test)
             else:
-                print "Epoch {0} complete".format(j)
+                print "Epoch {0} complete".format(j+1)
 
     def update_mini_batch(self, mini_batch, eta):
         """Update the network's weights and biases by applying
@@ -97,11 +116,11 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
             zs.append(z)
-            activation = sigmoid(z)
+            activation = self.func(z)
             activations.append(activation)
         # backward pass
         delta = self.cost_derivative(activations[-1], y) * \
-            sigmoid_prime(zs[-1])
+            self.func_prime(zs[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
         # Note that the variable l in the loop below is used a little
@@ -112,7 +131,7 @@ class Network(object):
         # that Python can use negative indices in lists.
         for l in xrange(2, self.num_layers):
             z = zs[-l]
-            sp = sigmoid_prime(z)
+            sp = self.func_prime(z)
             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
