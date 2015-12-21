@@ -36,7 +36,8 @@ class QuadraticCost(object):
     @staticmethod
     def delta(z, a, y):
         """Return the error delta from the output layer."""
-        return (a-y) * sigmoid_prime(z)
+        print "----hi from delta----"
+        return (a-y) * Network.func_prime(z)
 
 
 class CrossEntropyCost(object):
@@ -82,6 +83,9 @@ class Network(object):
         self.sizes = sizes
         self.default_weight_initializer()
         self.cost=cost
+        # Use sigmoid  as transfer function by default
+        self.set_transfer_function(sigmoid)
+        self.set_transfer_derivative(sigmoid_prime)
 
     def default_weight_initializer(self):
         """Initialize each weight using a Gaussian distribution with mean 0
@@ -123,7 +127,7 @@ class Network(object):
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
         for b, w in zip(self.biases, self.weights):
-            a = sigmoid(np.dot(w, a)+b)
+            a = self.func(np.dot(w, a)+b)
         return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
@@ -156,6 +160,9 @@ class Network(object):
         n = len(training_data)
         evaluation_cost, evaluation_accuracy = [], []
         training_cost, training_accuracy = [], []
+
+        max = 0
+
         for j in xrange(epochs):
             random.shuffle(training_data)
             mini_batches = [
@@ -180,10 +187,15 @@ class Network(object):
                 print "Cost on evaluation data: {}".format(cost)
             if monitor_evaluation_accuracy:
                 accuracy = self.accuracy(evaluation_data)
+
+                if accuracy > max:
+                    max = accuracy
+
                 evaluation_accuracy.append(accuracy)
                 print "Accuracy on evaluation data: {} / {}".format(
                     self.accuracy(evaluation_data), n_data)
-            print
+        print "The best accuracy: {}".format(max)
+
         return evaluation_cost, evaluation_accuracy, \
             training_cost, training_accuracy
 
@@ -220,7 +232,7 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
             zs.append(z)
-            activation = sigmoid(z)
+            activation = self.func(z)
             activations.append(activation)
         # backward pass
         delta = (self.cost).delta(zs[-1], activations[-1], y)
@@ -234,7 +246,7 @@ class Network(object):
         # that Python can use negative indices in lists.
         for l in xrange(2, self.num_layers):
             z = zs[-l]
-            sp = sigmoid_prime(z)
+            sp = self.func_prime(z)
             delta = np.dot(self.weights[-l+1].transpose(), delta) * sp
             nabla_b[-l] = delta
             nabla_w[-l] = np.dot(delta, activations[-l-1].transpose())
@@ -296,6 +308,12 @@ class Network(object):
         f = open(filename, "w")
         json.dump(data, f)
         f.close()
+
+    def set_transfer_function(self, func):
+        self.func = func
+
+    def set_transfer_derivative(self, func_prime):
+        self.func_prime = func_prime
 
 #### Loading a Network
 def load(filename):
