@@ -59,6 +59,15 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             a = self.func(np.dot(w, a)+b)
         return a
+    
+    def SGD_Epoch(self, training_data, mini_batch_size, eta):
+        n = len(training_data)
+        random.shuffle(training_data)
+        mini_batches = [
+            training_data[k:k+mini_batch_size]
+            for k in xrange(0, n, mini_batch_size)]
+        for mini_batch in mini_batches:
+            self.update_mini_batch(mini_batch, eta)
 
     def SGD(self, training_data, epochs, mini_batch_size, eta,
             test_data=None):

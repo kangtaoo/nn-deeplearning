@@ -4,10 +4,6 @@ import time
 import numpy as np
 
 def arctan(z):
-    """
-    The original arctan function is in the range (-PI/2, +PI/2).
-    This variation transforms the function to be in the range (0, 1).
-    """
     return np.arctan(z) / np.pi + 0.5
 
 def arctan_prime(z):
@@ -23,9 +19,7 @@ def main():
     print "Loading MNIST data..."
     training_data, validation_data, test_data = ml.load_data_wrapper()
 
-    """
-    Initialize the network
-    """
+    # Initialize the network
     net = network.Network([784,30,10])
     net.set_random_weights_and_biases()
     net.set_transfer_function(arctan)
