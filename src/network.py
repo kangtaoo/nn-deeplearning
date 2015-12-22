@@ -81,6 +81,8 @@ class Network(object):
         tracking progress, but slows things down substantially."""
         if test_data: n_test = len(test_data)
         n = len(training_data)
+        max = 0
+
         for j in xrange(epochs):
             random.shuffle(training_data)
             mini_batches = [
@@ -89,10 +91,17 @@ class Network(object):
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
             if test_data:
+                accuracy = self.evaluate(test_data)
+
+                if accuracy > max:
+                    max = accuracy
+                    
                 print "Epoch {0}: {1} / {2}".format(
-                    j+1, self.evaluate(test_data), n_test)
+                    j+1, accuracy, n_test)
             else:
                 print "Epoch {0} complete".format(j+1)
+
+        print "The best accuracy is: {}".format(max)
 
     def update_mini_batch(self, mini_batch, eta):
         """Update the network's weights and biases by applying
