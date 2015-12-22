@@ -19,16 +19,24 @@ def main():
     print "Loading MNIST data..."
     training_data, validation_data, test_data = ml.load_data_wrapper()
 
+    hidden = 50
+
     # Initialize the network
-    net = network.Network([784,30,10])
+    net = network.Network([784,hidden,10])
     net.set_random_weights_and_biases()
+
+    # net.set_transfer_function(tanh)
+    # net.set_transfer_derivative(tanh_prime)
+    # print "using tanh..."
+
     net.set_transfer_function(arctan)
     net.set_transfer_derivative(arctan_prime)
+    print "using arctan..."
     
-    epochs = 30
-    mbs = 10 # mini-batch size
-    eta = 0.75 # learning rate
-    print "Training net: epochs={}, MBS={}, eta={}...".format(epochs, mbs, eta)
+    epochs = 50
+    mbs = 1 # mini-batch size
+    eta = 0.9 # learning rate
+    print "Training net: epochs={}, MBS={}, eta={}, hidden={}...".format(epochs, mbs, eta, hidden)
 
     start_time = time.time()
     net.SGD(training_data, epochs, mbs, eta, validation_data)
