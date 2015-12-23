@@ -20,6 +20,7 @@ def show_menu():
     print 'q: Quit        h: Show this menu        r: Reset NN'
     print 'l: Set learning rate         m: Set mini-batch size'
     print 'e: Run [more] epochs on NN'
+    print 'n: Test against training data'
     print 't: Test against testing data'
 
 def prompt_for_action():
@@ -50,9 +51,10 @@ def prompt_for_net_params():
     return net
     
 def main():
-    print "Loading MNIST data..."
+    print 'Loading MNIST data...'
     training_data, validation_data, test_data = ml.load_data_wrapper()
-    n_val, n_test = (len(validation_data), len(test_data))
+    training_data2 = [(x,np.argmax(y)) for x,y in training_data]
+    n_train, n_val, n_test = (len(training_data), len(validation_data), len(test_data))
     
     net = prompt_for_net_params()
     eta = 0.5
@@ -66,6 +68,7 @@ def main():
     while True:
         ch = prompt_for_action()
         if ch == 'q':
+            print 'Bye!'
             sys.exit(0)
         elif ch == 'h':
             show_menu()
@@ -84,9 +87,11 @@ def main():
                 net.SGD_Epoch(training_data, mbs, eta)
                 epoch += 1
                 fparams = (e+1, epoch, net.evaluate(validation_data), n_val)
-                print "Epoch {} ({}): {} / {} validation samples correctly classified".format(*fparams)
+                print 'Epoch {} ({}): {} / {} validation samples correctly classified'.format(*fparams)
+        elif ch == 'n':
+            print '{} / {} training samples correctly classified'.format(net.evaluate(training_data2), n_train)
         elif ch == 't':
-            print "{} / {} testing samples correctly classified".format(net.evaluate(test_data), n_test)
+            print '{} / {} testing samples correctly classified'.format(net.evaluate(test_data), n_test)
 
 if __name__ == '__main__':
     main()
